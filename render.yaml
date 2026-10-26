@@ -1,0 +1,52 @@
+# Render blueprint for DevCollab.
+#
+# ONE web service, not two. Express serves the built React app from
+# client/dist and the API from /api on the same port, so there is no separate
+# static site, no CORS configuration and no SameSite=None cookie problem.
+#
+# Values are deliberately left blank below: fill them in Render's dashboard
+# (Environment -> Add Environment Variable) so no secret is ever committed.
+# See the "Deploy it yourself" section of README.md.
+
+services:
+  - type: web
+    name: devcollab
+    runtime: node
+    plan: free
+    region: oregon # change if you prefer; it only affects latency
+
+    # `npm install` pulls the server dependencies from the ROOT package.json.
+    # `npm run build` then installs the client's own dependencies and runs
+    # vite build, which writes client/dist for Express to serve.
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+
+    # Render restarts the service if this stops answering.
+    healthCheckPath: /api/health
+
+    envVars:
+      # sync:false means "prompt me for this in the dashboard, and never store
+      # it in this file". Every secret below uses it.
+      - key: MONGO_URI
+        sync: false # mongodb+srv://USER:PASS@cluster.../devcollab?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        sync: false # any long random string; changing it logs everyone out
+
+      # Required so Express serves client/dist and marks the auth cookie secure.
+      - key: NODE_ENV
+        value: production
+
+      # Optional: image uploads. Leave unset and the app accepts image URLs instead.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # Optional: AI description drafting. Leave unset and the button is hidden.
+      - key: GEMINI_API_KEY
+        sync: false
+
+    # PORT is injected by Render automatically - server.js reads process.env.PORT
+    # and only falls back to 5000 locally. Do NOT hardcode a port here.

@@ -1,0 +1,97 @@
+@import 'tailwindcss';
+
+/**
+ * Tailwind v4 keeps its design tokens in CSS, not a JS config file - this
+ * @theme block is the whole of our "tailwind.config.js".
+ *
+ * WHY name the brand colours instead of writing bg-indigo-500 everywhere: the
+ * accent appears on buttons, links, focus rings and active tabs. Defining it
+ * once means `bg-brand` can be changed in one place, and the screenshots in
+ * the report stay consistent.
+ */
+@theme {
+  --color-ink: #0b0e14;
+  --color-surface: #11151f;
+  --color-surface-2: #171c28;
+  --color-edge: #232a3a;
+  --color-brand: #6366f1;
+  --color-brand-soft: #818cf8;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html {
+  color-scheme: dark; /* makes native scrollbars and form controls dark too */
+}
+
+body {
+  @apply bg-ink text-slate-200 antialiased;
+  font-family: var(--font-sans);
+}
+
+/* A single focus style for the whole app, so keyboard users always see where
+   they are. Browsers' default outline disappears against a dark background. */
+*:focus-visible {
+  @apply outline-none ring-2 ring-brand/70 ring-offset-2 ring-offset-ink;
+}
+
+/* Thin scrollbars - the chat and feed are both long scrolling columns, and the
+   default 17px Windows scrollbar dominates a dark layout. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-edge);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2f3850;
+}
+
+/**
+ * Reusable component classes.
+ *
+ * WHY @apply here rather than repeating 12 utility classes on every button
+ * across nine pages: the markup stays readable and a style tweak is one edit
+ * instead of forty. Everything else in the app stays plain utility classes.
+ *
+ * WHY each variant repeats the base button utilities instead of `@apply btn`:
+ * in Tailwind v4, @apply only accepts real utilities, not another custom class
+ * from this file - `@apply btn` fails the build with "Cannot apply unknown
+ * utility class". The shared part is factored into the .btn selector list
+ * below so the repetition is only in the layout line, not in every rule.
+ */
+@layer components {
+  .btn,
+  .btn-primary,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
+           transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-brand text-white hover:bg-brand-soft;
+  }
+  .btn-ghost {
+    @apply border border-edge bg-surface-2 text-slate-300 hover:border-slate-600 hover:text-white;
+  }
+  .btn-danger {
+    @apply border border-red-900/60 bg-red-950/40 text-red-300 hover:bg-red-900/40;
+  }
+  .card {
+    @apply rounded-xl border border-edge bg-surface;
+  }
+  .input {
+    @apply w-full rounded-lg border border-edge bg-surface-2 px-3 py-2 text-sm text-slate-100
+           placeholder:text-slate-500 focus:border-brand;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-400;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-md bg-surface-2 px-2 py-0.5 text-xs text-slate-400;
+  }
+}
