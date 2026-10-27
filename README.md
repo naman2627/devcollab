@@ -417,32 +417,33 @@ implements it, so a reviewer can jump straight to the code behind a claim.
 
 ## 11. Deployment
 
-Nothing has been pushed or deployed. The repo is committed locally and ready.
-These are the only steps left:
+| | |
+|---|---|
+| **Live app** | _add the Render URL here once the service is live_ |
+| **Source** | https://github.com/naman2627/devcollab |
+| **Health check** | `/api/health` — returns `{"success":true,"status":"ok"}` |
 
-1. **Create an empty GitHub repository.** No README, no .gitignore — this repo
-   already has both.
+The repository is on GitHub and the `render.yaml` blueprint is committed, so
+the build and start commands do not need to be typed in by hand. Remaining
+steps, in order:
 
-2. **Push.** From the `devcollab/` folder:
-   ```bash
-   git remote add origin https://github.com/<you>/devcollab.git
-   git branch -M main
-   git push -u origin main
-   ```
+1. **Create a free MongoDB Atlas cluster** and copy its connection string.
+   Add `/devcollab` as the database name before the `?`, so the string ends
+   `...mongodb.net/devcollab?retryWrites=true&w=majority`.
 
-3. **Open Atlas → Network Access → Add IP Address → Allow access from
+2. **Open Atlas → Network Access → Add IP Address → Allow access from
    anywhere (`0.0.0.0/0`).** Render's outbound IPs are not fixed on the free
    plan, so without this the deployed app cannot reach your database and every
    request will hang then fail. This is the single most common reason a working
    MERN app dies on deploy.
 
-4. **Render → New → Web Service → connect the repository.** It reads
+3. **Render → New → Web Service → connect the repository.** It reads
    `render.yaml`, so the build and start commands are filled in already:
    - Build command: `npm install && npm run build`
    - Start command: `npm start`
    - Health check path: `/api/health`
 
-5. **Paste the environment variables** in Render → Environment. Required:
+4. **Paste the environment variables** in Render → Environment. Required:
 
    | Key | Value |
    |---|---|
@@ -461,11 +462,11 @@ These are the only steps left:
 
    Do **not** set `PORT` — Render injects it.
 
-6. **Deploy**, then seed the production database once. Either run
+5. **Deploy**, then seed the production database once. Either run
    `npm run seed` locally with `MONGO_URI` pointing at the same Atlas cluster,
    or use Render's Shell tab and run `npm run seed` there.
 
-7. **Check it.** Visit `https://<your-service>.onrender.com/api/health`, then
+6. **Check it.** Visit `https://<your-service>.onrender.com/api/health`, then
    the site itself, then log in as `aarav@devcollab.dev` / `password123`.
    The free plan sleeps after inactivity, so the first request after a pause
    takes ~30 seconds.
