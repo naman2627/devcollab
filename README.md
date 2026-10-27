@@ -117,7 +117,32 @@ resource is missing.
 
 ---
 
-## 5. Local setup
+## 5. Tech stack
+
+| Layer | Choice | Why this one |
+|---|---|---|
+| Runtime | **Node 18+** | One language across client and server, and the event loop suits an app whose two heaviest paths are both I/O-bound: database reads and open websockets. |
+| Server | **Express 4** | Small enough that the request path stays readable. Middleware composition is exactly the shape the auth/upload/error layers need. |
+| Database | **MongoDB + Mongoose** | Projects have ragged, list-shaped fields — `techStack`, `openRoles`, `likes` — that would otherwise be three join tables. Mongoose adds the schema validation and hooks that raw documents lack, so `pre('save')` can own password hashing. |
+| Real-time | **Socket.io** | Chat and the notification badge need server-initiated pushes. It shares the HTTP port, so it reuses the same auth cookie and needs no second service. Chosen over raw `ws` for rooms and automatic reconnection. |
+| Auth | **jsonwebtoken + bcryptjs** | A stateless 7-day JWT in an httpOnly cookie, so no session store to deploy. bcrypt at 12 rounds for deliberately slow password hashing. |
+| Client | **React 18** | The feed, applications dashboard and chat are all component trees over changing state. |
+| Build | **Vite 6** | Fast dev server, and its `/api` proxy makes local development single-origin, matching production exactly. |
+| Routing | **React Router 6** | Dynamic routes plus `useSearchParams`, which is what lets feed filters live in the URL. |
+| State | **Zustand** | Auth and socket state are needed across unrelated pages. Redux's boilerplate is not justified at this size; Context would re-render too broadly. |
+| Styling | **Tailwind v4** | Design tokens in one `@theme` block, and no separate stylesheet drifting from the markup. |
+| Images | **Cloudinary + multer** | Render's filesystem is ephemeral, so uploads cannot live on disk. `memoryStorage` streams straight through. Optional — absent keys fall back to an image-URL field. |
+| AI | **Google Gemini** | Drafts project descriptions. Called over plain `fetch` with an `AbortController` timeout rather than an SDK, since one endpoint does not justify a dependency. Optional. |
+| Hosting | **Render** | One web service runs the API and serves the built client, so there is no CORS setup and no cross-site cookie problem. Reads `render.yaml`. |
+
+Deliberately **not** used: TypeScript (the schema layer already validates at
+the boundary, and the time was better spent on workflows), Redux, a separate
+static host for the frontend, and any component library — the UI is small
+enough that Tailwind alone keeps it consistent.
+
+---
+
+## 6. Local setup
 
 ```bash
 cd devcollab
@@ -163,7 +188,7 @@ and a `NODE_ENV=production` server.
 
 ---
 
-## 6. Environment variables
+## 7. Environment variables
 
 | Variable | Required | What it does |
 |---|---|---|
@@ -179,7 +204,7 @@ and a `NODE_ENV=production` server.
 
 ---
 
-## 7. Architecture
+## 8. Architecture
 
 **One service.** Express serves the built React app and the API on a single
 port. No split deploy, no CORS configuration, no `SameSite=None` cookie
@@ -315,7 +340,7 @@ in the same millisecond.
 
 ---
 
-## 8. API
+## 9. API
 
 Every list endpoint returns
 `{ success, page, total, totalPages, hasMore, data }`.
@@ -368,7 +393,7 @@ Unauthenticated handshakes are rejected in `io.use()`.
 
 ---
 
-## 9. Demo logins
+## 10. Demo logins
 
 Seeded by `npm run seed`. **Password for every account: `password123`**
 
@@ -388,7 +413,7 @@ to accept, an unread notification, and a live chat thread with @isha.
 
 ---
 
-## 10. Engineering breakdown, by area
+## 11. Engineering breakdown, by area
 
 A map of every significant technical area in the project to the file that
 implements it, so a reviewer can jump straight to the code behind a claim.
@@ -415,7 +440,7 @@ implements it, so a reviewer can jump straight to the code behind a claim.
 
 ---
 
-## 11. Deployment
+## 12. Deployment
 
 | | |
 |---|---|
@@ -473,7 +498,7 @@ steps, in order:
 
 ---
 
-## 12. Future scope (what was cut, and why)
+## 13. Future scope (what was cut, and why)
 
 Cut deliberately to fit the time budget. Each is a genuine next step, not a
 hidden bug:
