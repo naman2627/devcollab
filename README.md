@@ -444,7 +444,7 @@ implements it, so a reviewer can jump straight to the code behind a claim.
 
 | | |
 |---|---|
-| **Live app** | _add the Render URL here once the service is live_ |
+| **Live app** | **https://devcollab-zaxt.onrender.com** |
 | **Source** | https://github.com/naman2627/devcollab |
 | **Health check** | `/api/health` — returns `{"success":true,"status":"ok"}` |
 
@@ -456,11 +456,25 @@ steps, in order:
    Add `/devcollab` as the database name before the `?`, so the string ends
    `...mongodb.net/devcollab?retryWrites=true&w=majority`.
 
-2. **Open Atlas → Network Access → Add IP Address → Allow access from
-   anywhere (`0.0.0.0/0`).** Render's outbound IPs are not fixed on the free
-   plan, so without this the deployed app cannot reach your database and every
-   request will hang then fail. This is the single most common reason a working
-   MERN app dies on deploy.
+2. **Open Atlas → Network Access and allow Render's outbound ranges.**
+   Render routes all outbound traffic for a region through a fixed set of
+   ranges, shown under the service's **Connect → Outbound** tab. For
+   Singapore they are:
+
+   ```
+   74.220.52.0/24
+   74.220.60.0/24
+   ```
+
+   Without these the deployed app cannot reach the database and every request
+   hangs, then fails — the single most common reason a working MERN app dies
+   on deploy. Allowlisting the two ranges is preferable to `0.0.0.0/0`, which
+   opens the cluster to the whole internet and leaves the password as the only
+   thing standing between it and the world.
+
+   Add your own public IP too if you want to run `npm run seed` or Compass
+   locally. On a mobile connection that address rotates, so expect to re-add
+   it.
 
 3. **Render → New → Web Service → connect the repository.** It reads
    `render.yaml`, so the build and start commands are filled in already:
