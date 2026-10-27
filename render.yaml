@@ -13,7 +13,7 @@ services:
     name: devcollab
     runtime: node
     plan: free
-    region: oregon # change if you prefer; it only affects latency
+    region: singapore # matches the Atlas cluster region - keeps DB latency ~1ms
 
     # `npm install` pulls the server dependencies from the ROOT package.json.
     # `npm run build` then installs the client's own dependencies and runs
