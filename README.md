@@ -447,10 +447,17 @@ implements it, so a reviewer can jump straight to the code behind a claim.
 | **Live app** | **https://devcollab-zaxt.onrender.com** |
 | **Source** | https://github.com/naman2627/devcollab |
 | **Health check** | `/api/health` — returns `{"success":true,"status":"ok"}` |
+| **Demo login** | `aarav@devcollab.dev` / `password123` — owns projects, has applications to decide and a live chat thread |
 
-The repository is on GitHub and the `render.yaml` blueprint is committed, so
-the build and start commands do not need to be typed in by hand. Remaining
-steps, in order:
+> **First request takes ~30-50 seconds.** Render's free plan sleeps a service
+> after inactivity and cold-starts it on the next request. Load the site once
+> and wait for it before judging anything — every request after that is fast.
+> The database sits in the same region as the service, so queries are ~1ms.
+
+The app above is already deployed and seeded. What follows is how to
+reproduce that deployment from scratch in your own accounts — the
+`render.yaml` blueprint is committed, so the build and start commands never
+need to be typed in by hand:
 
 1. **Create a free MongoDB Atlas cluster** and copy its connection string.
    Add `/devcollab` as the database name before the `?`, so the string ends
