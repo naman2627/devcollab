@@ -8,7 +8,116 @@ MERN end-term project — MongoDB, Express, React, Node, Socket.io.
 
 ---
 
-## 1. Run it locally
+## 1. Problem statement
+
+Side projects die alone.
+
+A developer with an idea usually needs two or three other people with
+complementary skills — someone for the frontend, someone who has deployed a
+model before, someone who will actually finish the mobile build. There is no
+good place to find them:
+
+- **GitHub** shows finished code, not projects that are looking for people.
+- **Twitter / Discord** posts scroll away within hours, and nobody can search
+  them later.
+- **LinkedIn** is built around paid jobs, not unpaid side projects.
+- **College groups** reach whoever happens to be in that group.
+
+So the match never happens. Ideas stay solo and quietly die, while the people
+who would have joined them — students who want real collaborative experience
+instead of another tutorial clone — have nowhere to look.
+
+The gap is not a lack of ideas or a lack of willing developers. It is that
+nothing connects the two and then gets the team talking.
+
+---
+
+## 2. Target users
+
+**Project owners** — developers and students who have a side project and need
+collaborators with named skills. They want to describe the project once, say
+which roles are open, and then judge who applies instead of cold-messaging
+strangers.
+
+**Collaborators** — students and junior developers who want to work on
+something real with other people, for portfolio evidence and experience. They
+want to filter by the stack they actually know and send a short pitch rather
+than hope a tweet is seen.
+
+Both sides are the same population at different moments: today's applicant is
+next month's owner, which is why every account can do both and there is no
+separate "recruiter" role.
+
+---
+
+## 3. Solution
+
+DevCollab is a recruitment pipeline for side projects, not a project
+directory. The product is the full lifecycle:
+
+```
+Owner posts a project with open roles and a tech stack
+        |
+Collaborator discovers it         (search, tech filter, status filter)
+        |
+Collaborator applies with a pitch (once per project - enforced in the database)
+        |
+Owner reviews applications        (dashboard of everyone who applied)
+        |
+Owner accepts or rejects          (the decision that forms the team)
+        |
+Acceptance unlocks a private real-time chat
+        |
+The team starts working
+```
+
+The design idea that holds it together: **acceptance is the gate that creates
+the team.** The chat thread does not exist until an owner accepts somebody.
+That single rule is what makes this an application with a workflow rather than
+a board of posts — the accept decision changes authorization, creates a
+conversation, writes a notification and opens a websocket room, all from one
+action.
+
+---
+
+## 4. Key features
+
+Five workflows, each implemented end to end rather than stubbed:
+
+**1. Post and discover projects.** Create a project with a summary, tech stack,
+open roles, status and cover image (uploaded to Cloudinary, or a plain URL if
+no keys are configured). The feed offers full-text search, filtering by tech and
+status, and sorting; every filter lives in the URL, so a filtered feed is a
+shareable link. All lists are paginated with a server-side cap on `?limit`.
+
+**2. Apply and decide.** One application per person per project, enforced by a
+compound unique index rather than a racy controller check. Owners get a
+dashboard of applications to accept or reject; applicants see their own
+outgoing applications and current status.
+
+**3. Real-time collaboration.** Acceptance opens a private chat between owner
+and collaborator — Socket.io over the same port and the same auth cookie, with
+typing indicators, online presence and multi-tab support. Messages are written
+to MongoDB before they are emitted, so nothing shown ever disappears on
+refresh.
+
+**4. Social signals.** Upvote projects, comment on them, follow other
+developers, and get a live notification badge on likes, comments,
+applications, decisions and follows. There is a "following" feed built from who
+you follow.
+
+**5. AI-assisted drafting.** Gemini drafts a project description from the
+title and tech stack, so the blank-page problem does not stop someone posting.
+It is strictly optional — with no API key the endpoint returns a clean 503 and
+the client hides the button.
+
+Authentication sits under all of it: a 7-day JWT in an httpOnly cookie, bcrypt
+at 12 rounds, and ownership checks that return 403 rather than pretending a
+resource is missing.
+
+---
+
+## 5. Local setup
 
 ```bash
 cd devcollab
@@ -54,7 +163,7 @@ and a `NODE_ENV=production` server.
 
 ---
 
-## 2. Environment variables
+## 6. Environment variables
 
 | Variable | Required | What it does |
 |---|---|---|
@@ -70,7 +179,7 @@ and a `NODE_ENV=production` server.
 
 ---
 
-## 3. Architecture
+## 7. Architecture
 
 **One service.** Express serves the built React app and the API on a single
 port. No split deploy, no CORS configuration, no `SameSite=None` cookie
@@ -206,7 +315,7 @@ in the same millisecond.
 
 ---
 
-## 4. API
+## 8. API
 
 Every list endpoint returns
 `{ success, page, total, totalPages, hasMore, data }`.
@@ -259,7 +368,7 @@ Unauthenticated handshakes are rejected in `io.use()`.
 
 ---
 
-## 5. Demo logins
+## 9. Demo logins
 
 Seeded by `npm run seed`. **Password for every account: `password123`**
 
@@ -279,9 +388,12 @@ to accept, an unread notification, and a live chat thread with @isha.
 
 ---
 
-## 6. Syllabus mapping (units 1–17)
+## 10. Engineering breakdown, by area
 
-| Unit | Topic | Where it is in this project |
+A map of every significant technical area in the project to the file that
+implements it, so a reviewer can jump straight to the code behind a claim.
+
+| # | Area | Where it is in this project |
 |---|---|---|
 | 1 | Web architecture, client–server | Single-service design: Express serves API + SPA on one port (`server/app.js`). Request lifecycle diagrammed above. |
 | 2 | HTML / semantic markup | `client/index.html`, semantic `article` / `aside` / `nav` / `fieldset` throughout the components. |
@@ -303,7 +415,7 @@ to accept, an unread notification, and a live chat thread with @isha.
 
 ---
 
-## 7. Deploy it yourself
+## 11. Deployment
 
 Nothing has been pushed or deployed. The repo is committed locally and ready.
 These are the only steps left:
@@ -360,7 +472,7 @@ These are the only steps left:
 
 ---
 
-## 8. Future scope (what was cut, and why)
+## 12. Future scope (what was cut, and why)
 
 Cut deliberately to fit the time budget. Each is a genuine next step, not a
 hidden bug:
